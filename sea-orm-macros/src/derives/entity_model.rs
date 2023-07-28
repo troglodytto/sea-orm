@@ -1,10 +1,9 @@
 use super::util::{escape_rust_keyword, trim_starting_raw_identifier};
 use heck::{ToSnakeCase, ToUpperCamelCase};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, quote_spanned};
+use quote::quote;
 use syn::{
     punctuated::Punctuated, spanned::Spanned, token::Comma, Attribute, Data, Expr, Fields, Lit,
-    LitStr, Type,
 };
 
 /// Method to derive an Model
@@ -138,7 +137,15 @@ pub fn expand_derive_entity_model(data: Data, attrs: Vec<Attribute>) -> syn::Res
                             } else if meta.path.is_ident("default_value") {
                                 default_value = Some(meta.value()?.parse::<Lit>()?);
                             } else if meta.path.is_ident("default_expr") {
-                                default_expr = Some(meta.value()?.parse::<Lit>()?);
+                                let lit = meta.value()?.parse()?;
+                                if let Lit::Str(litstr) = lit {
+                                    let value_expr: TokenStream = syn::parse_str(&litstr.value())?;
+                                    default_expr = Some(value_expr);
+                                } else {
+                                    return Err(
+                                        meta.error(format!("Invalid column_type {:?}", lit))
+                                    );
+                                }
                             } else if meta.path.is_ident("column_name") {
                                 let lit = meta.value()?.parse()?;
                                 if let Lit::Str(litstr) = lit {
@@ -245,57 +252,12 @@ pub fn expand_derive_entity_model(data: Data, attrs: Vec<Attribute>) -> syn::Res
                     } else {
                         field_type.as_str()
                     };
+                    let field_span = field.span();
 
-                    let sea_query_col_type = match sql_type {
-                        Some(t) => quote! { sea_orm::prelude::ColumnType::#t },
-                        None => {
-                            let col_type = match field_type {
-                                "char" => quote! { Char(None) },
-                                "String" | "&str" => quote! { String(None) },
-                                "i8" => quote! { TinyInteger },
-                                "u8" => quote! { TinyUnsigned },
-                                "i16" => quote! { SmallInteger },
-                                "u16" => quote! { SmallUnsigned },
-                                "i32" => quote! { Integer },
-                                "u32" => quote! { Unsigned },
-                                "i64" => quote! { BigInteger },
-                                "u64" => quote! { BigUnsigned },
-                                "f32" => quote! { Float },
-                                "f64" => quote! { Double },
-                                "bool" => quote! { Boolean },
-                                "Date" | "NaiveDate" => quote! { Date },
-                                "Time" | "NaiveTime" => quote! { Time },
-                                "DateTime" | "NaiveDateTime" => {
-                                    quote! { DateTime }
-                                }
-                                "DateTimeUtc" | "DateTimeLocal" | "DateTimeWithTimeZone" => {
-                                    quote! { TimestampWithTimeZone }
-                                }
-                                "Uuid" => quote! { Uuid },
-                                "Json" => quote! { Json },
-                                "Decimal" => quote! { Decimal(None) },
-                                "Vec<u8>" => {
-                                    quote! { Binary(sea_orm::sea_query::BlobSize::Blob(None)) }
-                                }
-                                _ => {
-                                    // Assumed it's ActiveEnum if none of the above type matches
-                                    quote! {}
-                                }
-                            };
-                            if col_type.is_empty() {
-                                let field_span = field.span();
-                                let ty: Type = LitStr::new(field_type, field_span).parse()?;
-                                let def = quote_spanned! { field_span =>
-                                    std::convert::Into::<sea_orm::ColumnType>::into(
-                                        <#ty as sea_orm::sea_query::ValueType>::column_type()
-                                    )
-                                };
-                                quote! { #def }
-                            } else {
-                                quote! { sea_orm::prelude::ColumnType::#col_type }
-                            }
-                        }
-                    };
+                    let sea_query_col_type = crate::derives::sql_type_match::col_type_match(
+                        sql_type, field_type, field_span,
+                    );
+
                     let col_def =
                         quote! { sea_orm::prelude::ColumnTypeTrait::def(#sea_query_col_type) };
 
@@ -313,7 +275,7 @@ pub fn expand_derive_entity_model(data: Data, attrs: Vec<Attribute>) -> syn::Res
                         match_row = quote! { #match_row.default_value(#default_value) };
                     }
                     if let Some(default_expr) = default_expr {
-                        match_row = quote! { #match_row.default_expr(#default_expr) };
+                        match_row = quote! { #match_row.default(#default_expr) };
                     }
                     columns_trait.push(match_row);
                 }

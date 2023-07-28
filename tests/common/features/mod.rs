@@ -13,6 +13,7 @@ pub mod event_trigger;
 pub mod insert_default;
 pub mod json_struct;
 pub mod json_vec;
+pub mod json_vec_derive;
 pub mod metadata;
 pub mod pi;
 pub mod repository;
@@ -23,6 +24,7 @@ pub mod self_join;
 pub mod teas;
 pub mod transaction_log;
 pub mod uuid_fmt;
+pub mod value_type;
 
 pub use active_enum::Entity as ActiveEnum;
 pub use active_enum_child::Entity as ActiveEnumChild;

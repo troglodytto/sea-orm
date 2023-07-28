@@ -19,17 +19,18 @@
 ## Getting Started
 
 [![GitHub stars](https://img.shields.io/github/stars/SeaQL/sea-orm.svg?style=social&label=Star&maxAge=1)](https://github.com/SeaQL/sea-orm/stargazers/)
-If you like what we do, consider starring, commenting, sharing and contributing!
+If you like what we do, consider starring, sharing and contributing!
+
++ [Documentation](https://www.sea-ql.org/SeaORM)
++ [Tutorial](https://www.sea-ql.org/sea-orm-tutorial)
++ [Cookbook](https://www.sea-ql.org/sea-orm-cookbook)
 
 [![Discord](https://img.shields.io/discord/873880840487206962?label=Discord)](https://discord.com/invite/uCPdDXzbdv)
 Join our Discord server to chat with others in the SeaQL community!
 
-+ [Getting Started](https://www.sea-ql.org/SeaORM/docs/index)
-+ [Step-by-step Tutorials](https://www.sea-ql.org/sea-orm-tutorial/)
-+ [Cookbook](https://www.sea-ql.org/sea-orm-cookbook/)
-+ [Usage Example](https://github.com/SeaQL/sea-orm/tree/master/examples/basic)
+Please help us with maintaining SeaORM by completing the [SeaQL Community Survey 2023](https://sea-ql.org/community-survey)!
 
-Integration examples
+Integration examples:
 
 + [Actix v4 Example](https://github.com/SeaQL/sea-orm/tree/master/examples/actix_example)
 + [Actix v3 Example](https://github.com/SeaQL/sea-orm/tree/master/examples/actix3_example)
@@ -49,15 +50,15 @@ Integration examples
 
 2. Dynamic
 
-    Built upon [SeaQuery](https://github.com/SeaQL/sea-query), SeaORM allows you to build complex queries without 'fighting the ORM'.
+    Built upon [SeaQuery](https://github.com/SeaQL/sea-query), SeaORM allows you to build complex dynamic queries.
 
 3. Testable
 
-    Use mock connections to write unit tests for your logic.
+    Use mock connections and/or SQLite to write tests for your application logic.
 
 4. Service Oriented
 
-    Quickly build services that join, filter, sort and paginate data in APIs.
+    Quickly build services that join, filter, sort and paginate data in REST, GraphQL and gRPC APIs.
 
 ## A quick taste of SeaORM
 
@@ -208,7 +209,6 @@ The following products are powered by SeaORM:
 </table>
 
 SeaORM is the foundation of:
-+ [StarfishQL](https://github.com/SeaQL/starfish-ql): an experimental graph database
 + [Seaography](https://github.com/SeaQL/seaography): GraphQL framework for SeaORM
 
 For more projects, see [Built with SeaORM](https://github.com/SeaQL/sea-orm/blob/master/COMMUNITY.md#built-with-seaorm).
